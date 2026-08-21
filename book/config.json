@@ -1,7 +1,4 @@
 {
-    "paths": ["https://raw.githubusercontent.com/shidahuilang/shuyuan/shuyuan/good.json",
-    "https://raw.githubusercontent.com/XIU2/Yuedu/refs/heads/master/shuyuan",    
-    "https://cdn05042023.gitlink.org.cn/api/v1/repos/yi-c/yd/raw/sy.json?ref=master&access_token=92edf695d430562349cbfac4009fda6ad36817dd"],
     "outpath": "./results/",
     "workers": 64,
     "dedup": "y",
@@ -16,7 +13,6 @@
         "失效",
         "验证",
         "码",
-        "漫",
         "听",
         "YiOVE",
         "qq",

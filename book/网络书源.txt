@@ -1,0 +1,10 @@
+# 网络书源地址配置，每行一个URL，空行和以#开头的行会被忽略
+https://www.yckceo.com/yuedu/shuyuans/json/id/1083.json
+https://bitbucket.org/xiu2/yuedu/raw/master/shuyuan
+https://shuyuan-api.yiove.com/import/book-source-collection/a8adf570-e115-4b99-87e3-ccaf298ae361
+https://legado.miaogongzi.org/%E9%98%85%E8%AF%BB%E4%B9%A6%E6%BA%90/hff.json
+https://legado.miaogongzi.org/%E9%98%85%E8%AF%BB%E4%B9%A6%E6%BA%90/sy.json
+https://cdn.mgz.la/shuyuan/250701%E6%9C%80%E5%90%8E%E4%B8%80%E7%89%88%E4%B8%80%E7%A8%8B.json
+https://shuyuan.nyasama.cc/shuyuan/f5b15e9641d164937061974cfefb675c.json
+https://legado.aoaostar.com/sources/71e56d4f.json
+https://sy.nyasama.cc/shuyuan/469b68b8c8e7344eb38664d2fb1bdd17.json

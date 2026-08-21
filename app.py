@@ -2,6 +2,7 @@ import os
 import json
 import time
 import sys
+from urllib.parse import urlparse
 from book.book import BookSourceManager
 
 def resource_path(relative_path):
@@ -57,6 +58,47 @@ def load_or_create_config():
             with open(config_paths, 'r', encoding='utf-8') as f:
                 return json.load(f)
 
+def get_local_source_paths():
+    """ 自动发现本地书源文件夹中的书源文件（仅 .json） """
+    folder = resource_path(os.path.join('book', '本地书源'))
+    if not os.path.isdir(folder):
+        os.makedirs(folder, exist_ok=True)
+        return []
+    return [os.path.join(folder, f) for f in os.listdir(folder)
+            if f.lower().endswith('.json')]
+
+def get_network_source_paths():
+    """ 从网络书源配置文件读取地址，每行一个URL，空行和 # 开头的注释行忽略 """
+    file_path = resource_path(os.path.join('book', '网络书源.txt'))
+    if not os.path.exists(file_path):
+        with open(file_path, 'w', encoding='utf-8') as f:
+            pass
+        return []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        return [line.strip() for line in f
+                if line.strip() and not line.strip().startswith('#')]
+
+def get_blocked_domains():
+    """ 读取屏蔽网站配置，每行一个域名（支持完整URL，自动取域名并去掉www.），空行和 # 注释行忽略 """
+    file_path = resource_path(os.path.join('book', '屏蔽网站.txt'))
+    if not os.path.exists(file_path):
+        with open(file_path, 'w', encoding='utf-8') as f:
+            pass
+        return []
+    domains = []
+    with open(file_path, 'r', encoding='utf-8') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            if '://' in line:
+                line = urlparse(line).hostname or line
+            if line.lower().startswith('www.'):
+                line = line[4:]
+            if line:
+                domains.append(line.lower())
+    return list(dict.fromkeys(domains))
+
 def main():
     print("欢迎使用书源校验生成工具（VerifyBookSource v2.1）\n"
           f"{'-' * 16}")
@@ -65,7 +107,21 @@ def main():
     if config is None:
         return
 
-    manager = BookSourceManager(config['paths'], config)
+    local_paths = get_local_source_paths()
+    if local_paths:
+        print(f"已自动加载本地书源文件夹（book/本地书源）中的 {len(local_paths)} 个文件：")
+        for path in local_paths:
+            print(f"  - {os.path.basename(path)}")
+
+    network_paths = get_network_source_paths()
+    print(f"已从网络书源配置文件（book/网络书源.txt）读取 {len(network_paths)} 个地址")
+
+    blocked_domains = get_blocked_domains()
+    if blocked_domains:
+        print(f"已从屏蔽网站配置（book/屏蔽网站.txt）读取 {len(blocked_domains)} 个域名: {', '.join(blocked_domains)}")
+    config['blocked_domains'] = blocked_domains
+
+    manager = BookSourceManager(local_paths + network_paths, config)
     start_time = time.time()
     results = manager.process_books(int(config['workers']))
     elapsed_time = time.time() - start_time
@@ -81,7 +137,7 @@ def main():
           f"有效书源数：{analysis['valid']}\n"
           f"无效书源数：{analysis['invalid']}\n"
           f"成功率：{analysis['success_rate']:.2f}%\n"
-          f"重复书源数：{(analysis['total'] - analysis['valid'] - analysis['invalid']) if config['dedup'] else '未选择去重'}\n"
+          f"重复书源数：{analysis['duplicates'] if config.get('dedup') == 'y' else '未选择去重'}\n"
           f"耗时：{elapsed_time:.2f}秒\n")
 
     # 只在非 GitHub Actions 环境中等待用户输入
